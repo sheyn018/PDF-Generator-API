@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "axios": "^1.6.8",
+    "express": "^4.19.1",
+    "fs": "^0.0.1-security",
+    "pdf-lib": "^1.17.1",
+    "svg-to-img": "^2.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30"
+  }
+}
