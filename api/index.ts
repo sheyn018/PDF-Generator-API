@@ -22,15 +22,15 @@ app.get("/generate-pdf", async (req, res) => {
         const stream = doc.pipe(createWriteStream('landscape.pdf'));
 
         // Add User Name
-        doc.fontSize(12).text(`User Name: ${userName}`, 50, 550);
+        doc.fontSize(12).text(`User Name: ${userName}`, 50, 50);
 
         // Add Date Generated
         const dateGenerated = new Date().toLocaleDateString(); // Get current date
-        doc.text(`Date Generated: ${dateGenerated}`, 50, 530);
+        doc.text(`Date Generated: ${dateGenerated}`, 50, 70);
 
         // Add images from URLs
-        let currentPosition = 50;
-        for (const url of firstSetUrls) {
+        let currentPosition = 100;
+        for (const url of [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl]) {
             const response = await axios.get(url, { responseType: 'text' });
             const svgString = response.data;
 
@@ -38,7 +38,7 @@ app.get("/generate-pdf", async (req, res) => {
             const pngBuffer = await svgToImg.from(svgString).toPng();
 
             // Draw the image on the page
-            doc.image(pngBuffer, currentPosition, 450, { width: 90, height: 100 });
+            doc.image(pngBuffer, currentPosition, 100, { width: 90, height: 100 });
             currentPosition += 110;
         }
 
@@ -47,7 +47,7 @@ app.get("/generate-pdf", async (req, res) => {
         const screenshotImage = screenshotResponse.data;
 
         // Draw the screenshot image on the page
-        doc.image(screenshotImage, 50, 250, { width: 200 });
+        doc.image(screenshotImage, 50, 300, { width: 400 });
         
         // Finalize the document
         doc.end();
