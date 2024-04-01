@@ -12,7 +12,6 @@ async function testGeneratePDFEndpoint() {
       fourthUrl: "https://www.thecolorapi.com/id?format=svg&hex=B2DAD1",
       fifthUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5DAD5",
       screenshotUrl: "https://puppeteer-api-iy77.onrender.com/capture-screenshot?font=merriweather",
-      base64Image: ""
     };
 
     const response = await axios.get('http://localhost:3000/generate-pdf', {

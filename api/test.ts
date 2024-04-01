@@ -14,13 +14,13 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 app.get("/generate-pdf", async (req, res) => {
     
     try {
-        const { userName, firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, screenshotUrl, base64Image } = req.query;
+        let { userName, firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, screenshotUrl } = req.query;
 
         const firstSetUrls = [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl];
 
-        // Create a new PDF document
+        // Create a new PDF document in landscape orientation
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage(); // Add a single page
+        const page = pdfDoc.addPage({ size: [792, 612] }); // 11x8.5 inches = 792x612 points        
 
         // Draw text on the page
         const textX = 50; // X position for text
@@ -75,38 +75,36 @@ app.get("/generate-pdf", async (req, res) => {
             currentPosition += imageWidth + 20;
         }
 
-        // Fetch and embed the image from the second URL
+        // Fetch and embed the image from the screenshot URL
         const screenshotResponse = await axios.get(screenshotUrl, { responseType: 'arraybuffer' });
         const screenshotImage = await pdfDoc.embedPng(screenshotResponse.data);
         const imageSize = screenshotImage.scale(0.5);
         const screenshotImageWidth = imageSize.width;
         const screenshotImageHeight = imageSize.height;
-        const screenshotPosition = page.getWidth() / 2 - screenshotImageWidth / 2;
+        const screenshotPosition = page.getWidth() / 4 - screenshotImageWidth / 2; // Position screenshot on the left side
 
         // Draw the screenshot image on the page
         page.drawImage(screenshotImage, {
             x: screenshotPosition,
-            y: currentPosition - 150,
+            y: page.getHeight() - screenshotImageHeight - 200,
             width: screenshotImageWidth,
             height: screenshotImageHeight,
         });
 
-        // Decode base64 image if provided as a query parameter
-        const base64Buffer = Buffer.from(base64Image.split(',')[1], 'base64');
+        // Draw colors on the right side
+        const colorsPosition = (page.getWidth() * 3) / 4 - screenshotImageWidth / 2; // Position colors on the right side
+        const colors = ["Red", "Green", "Blue"]; // Example colors
+        const colorY = page.getHeight() - screenshotImageHeight - 200; // Y position for colors
 
-        // Embed and draw the base64 image
-        const base64ImageEmbed = await pdfDoc.embedJpg(base64Buffer);
-        const base64ImageSize = base64ImageEmbed.scale(0.5);
-        const base64ImageWidth = base64ImageSize.width;
-        const base64ImageHeight = base64ImageSize.height;
-
-        // Draw the base64 image on the page
-        page.drawImage(base64ImageEmbed, {
-            x: screenshotPosition + 30,
-            y: currentPosition - base64ImageHeight - 130,
-            width: base64ImageWidth,
-            height: base64ImageHeight,
-        });
+        for (let i = 0; i < colors.length; i++) {
+            page.drawText(colors[i], {
+                x: colorsPosition,
+                y: colorY - (i * 20),
+                size: fontSize,
+                font: font,
+                color: fontColor,
+            });
+        }
 
         // Save the PDF to a file
         const pdfBytes = await pdfDoc.save();
@@ -129,5 +127,3 @@ app.get("/generate-pdf", async (req, res) => {
 app.listen(3001, () => console.log("Server ready on port 3001."));
 
 module.exports = app;
-
-// Sample URL: http://localhost:3000/generate-pdf?userName=JohnDoe&firstUrl=https%3A%2F%2Fwww.thecolorapi.com%2Fid%3Fformat%3Dsvg%26hex%3DE5DAD4&secondUrl=https%3A%2F%2Fwww.thecolorapi.com%2Fid%3Fformat%3Dsvg%26hex%3DE5CBD4&thirdUrl=https%3A%2F%2Fwww.thecolorapi.com%2Fid%3Fformat%3Dsvg%26hex%3DF4DAC3&fourthUrl=https%3A%2F%2Fwww.thecolorapi.com%2Fid%3Fformat%3Dsvg%26hex%3DB2DAD1&fifthUrl=https%3A%2F%2Fwww.thecolorapi.com%2Fid%3Fformat%3Dsvg%26hex%3DE5DAD5&screenshotUrl=https%3A%2F%2Fpuppeteer-api-iy77.onrender.com%2Fcapture-screenshot%3Ffont%3Dmerriweather
