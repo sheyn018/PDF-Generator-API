@@ -43,6 +43,8 @@ app.get("/generate-pdf", async (req, res) => {
 
         // Add images from URLs on the right side
         let currentPosition = 120; // Start position vertically
+        const textXCoordinate = 530; // X-coordinate for text
+
         for (const url of firstSetUrls) {
             const response = await axios.get(url, { responseType: 'text' });
             const svgString = response.data;
@@ -52,6 +54,18 @@ app.get("/generate-pdf", async (req, res) => {
 
             // Draw the image on the right side
             doc.image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
+
+            // Add text next to the image
+            const hexValue = "#FFFFFF"; // Example hex value, replace with actual value
+            const rgbValue = "255, 255, 255"; // Example RGB value, replace with actual value
+            const cmykValue = "0, 0, 0, 0"; // Example CMYK value, replace with actual value
+
+            doc.fontSize(10)
+            .text('')
+            .text(`HEX: ${hexValue}`, textXCoordinate, currentPosition + 5)
+            .text(`RGB: ${rgbValue}`, textXCoordinate, currentPosition + 17)
+            .text(`CMYK: ${cmykValue}`, textXCoordinate, currentPosition + 27);
+
             currentPosition += 95; // Increment vertical position
         }
         
