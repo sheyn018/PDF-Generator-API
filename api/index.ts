@@ -12,8 +12,29 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 // New route handler for PDF generation
 app.get("/generate-pdf", async (req, res) => {
     try {
-        const { userName, firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, screenshotUrl } = req.query;
-        const firstSetUrls = [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl];
+        let { userName, 
+            firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, 
+            firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB,
+            firstHex, secondHex, thirdHex, fourthHex, fifthHex,
+            firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK,
+            screenshotUrl } = req.query;
+        
+        userName = decodeURIComponent(userName);
+        firstRGB = decodeURIComponent(firstRGB);
+        secondRGB = decodeURIComponent(secondRGB);
+        thirdRGB = decodeURIComponent(thirdRGB);
+        fourthRGB = decodeURIComponent(fourthRGB);
+        fifthRGB = decodeURIComponent(fifthRGB);
+        firstCMYK = decodeURIComponent(firstCMYK);
+        secondCMYK = decodeURIComponent(secondCMYK);
+        thirdCMYK = decodeURIComponent(thirdCMYK);
+        fourthCMYK = decodeURIComponent(fourthCMYK);
+        fifthCMYK = decodeURIComponent(fifthCMYK);
+
+        const urlSet = [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl];
+        const rgbSet = [firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB];
+        const hexSet = [firstHex, secondHex, thirdHex, fourthHex, fifthHex];
+        const cmykSet = [firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK];
 
         // Create a new PDF document in landscape orientation
         const doc = new PDFDocument({ layout: 'landscape' });
@@ -44,8 +65,8 @@ app.get("/generate-pdf", async (req, res) => {
         // Add images from URLs on the right side
         let currentPosition = 120; // Start position vertically
         const textXCoordinate = 530; // X-coordinate for text
-
-        for (const url of firstSetUrls) {
+        let index = 0;
+        for (const url of urlSet) {
             const response = await axios.get(url, { responseType: 'text' });
             const svgString = response.data;
 
@@ -56,17 +77,18 @@ app.get("/generate-pdf", async (req, res) => {
             doc.image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
 
             // Add text next to the image
-            const hexValue = "#FFFFFF"; // Example hex value, replace with actual value
-            const rgbValue = "255, 255, 255"; // Example RGB value, replace with actual value
-            const cmykValue = "0, 0, 0, 0"; // Example CMYK value, replace with actual value
+            const hexValue = hexSet[index];
+            const rgbValue = rgbSet[index];
+            const cmykValue = cmykSet[index];
 
             doc.fontSize(10)
             .text('')
-            .text(`HEX: ${hexValue}`, textXCoordinate, currentPosition + 5)
+            .text(`HEX: ${hexValue}`, textXCoordinate, currentPosition + 7)
             .text(`RGB: ${rgbValue}`, textXCoordinate, currentPosition + 17)
             .text(`CMYK: ${cmykValue}`, textXCoordinate, currentPosition + 27);
 
             currentPosition += 95; // Increment vertical position
+            index++;
         }
         
         // Finalize the document
