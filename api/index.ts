@@ -25,29 +25,35 @@ app.get("/generate-pdf", async (req, res) => {
         doc.fontSize(12).text(`User Name: ${userName}`, 50, 50);
 
         // Add Date Generated
-        const dateGenerated = new Date().toLocaleDateString(); // Get current date
-        doc.text(`Date Generated: ${dateGenerated}`, 50, 70);
+        const dateGenerated = new Date().toLocaleDateString();
+        doc.text(`Date Generated: ${dateGenerated}`, 550, 50);
 
-        // Add images from URLs
-        let currentPosition = 100;
-        for (const url of [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl]) {
-            const response = await axios.get(url, { responseType: 'text' });
-            const svgString = response.data;
-
-            // Convert SVG to PNG
-            const pngBuffer = await svgToImg.from(svgString).toPng();
-
-            // Draw the image on the page
-            doc.image(pngBuffer, currentPosition, 100, { width: 90, height: 100 });
-            currentPosition += 110;
-        }
+        // Add "Typography" header
+        doc.font('Helvetica-Bold').text('TYPOGRAPHY', 50, 90, { continued: true, width: 200, align: 'left' });
 
         // Add screenshot image from URL
         const screenshotResponse = await axios.get(screenshotUrl, { responseType: 'arraybuffer' });
         const screenshotImage = screenshotResponse.data;
 
         // Draw the screenshot image on the page
-        doc.image(screenshotImage, 50, 300, { width: 400 });
+        doc.image(screenshotImage, 50, 120, { width: 300 });
+
+        // Add "Color Palette" header
+        doc.font('Helvetica-Bold').text('COLOR PALETTE', 350, 90, { continued: true, width: 200, align: 'right' });
+
+        // Add images from URLs on the right side
+        let currentPosition = 120; // Start position vertically
+        for (const url of firstSetUrls) {
+            const response = await axios.get(url, { responseType: 'text' });
+            const svgString = response.data;
+
+            // Convert SVG to PNG
+            const pngBuffer = await svgToImg.from(svgString).toPng();
+
+            // Draw the image on the right side
+            doc.image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
+            currentPosition += 95; // Increment vertical position
+        }
         
         // Finalize the document
         doc.end();

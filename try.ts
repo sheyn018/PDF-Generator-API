@@ -5,13 +5,13 @@ const { AggregateError } = require('axios');
 async function testGeneratePDFEndpoint() {
   try {
     const queryParams = {
-      userName: "John",
+      userName: "John Doe",
       firstUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5DAD4",
       secondUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5CBD4",
       thirdUrl: "https://www.thecolorapi.com/id?format=svg&hex=F4DAC3",
       fourthUrl: "https://www.thecolorapi.com/id?format=svg&hex=B2DAD1",
       fifthUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5DAD5",
-      screenshotUrl: "https://puppeteer-api-iy77.onrender.com/capture-screenshot?font=merriweather",
+      screenshotUrl: "https://puppeteer-api-iy77.onrender.com/capture-screenshot?font=Merriweather",
     };
 
     const response = await axios.get('http://localhost:3000/generate-pdf', {
