@@ -3,8 +3,18 @@ const { createWriteStream } = require('fs');
 const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const svgToImg = require('svg-to-img');
+const nodemailer = require('nodemailer');
 
 const app = express();
+
+// Configure Nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'sheane39@gmail.com',
+        pass: 'gxqi seqf gjyz kkmj'
+    }
+});
 
 // Existing route handler
 app.get("/", (req, res) => res.send("Express on Vercel"));
@@ -104,12 +114,29 @@ app.get("/generate-pdf", async (req, res) => {
         // Finalize the document
         doc.end();
 
-        // Wait for the PDF to be finished writing
-        stream.on('finish', () => {
-            // Send the PDF as response
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename="landscape.pdf"');
-            res.download('landscape.pdf');
+        /// Wait for the PDF to be finished writing
+        stream.on('finish', async () => {
+            try {
+                // Send the PDF as attachment via email
+                const info = await transporter.sendMail({
+                    from: 'sheane39@gmail.com',
+                    to: 'sheanemtolentino@gmail.com',
+                    subject: 'Your PDF Report',
+                    text: 'Please find the PDF attached.',
+                    attachments: [
+                        {
+                            filename: 'landscape.pdf',
+                            path: 'landscape.pdf'
+                        }
+                    ]
+                });
+
+                console.log('Email sent:', info.response);
+                res.status(200).send('PDF emailed successfully');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                res.status(500).send('Error sending email');
+            }
         });
     } catch (error) {
         console.error('Error generating PDF:', error);
