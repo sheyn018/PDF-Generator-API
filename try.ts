@@ -6,6 +6,12 @@ async function testGeneratePDFEndpoint() {
   try {
     const queryParams = {
       userName: encodeURIComponent("John Doe"),
+      businessName: encodeURIComponent("Acme Inc."),
+      industry: encodeURIComponent("Technology"),
+      targetAudience: encodeURIComponent("Developers"),
+      visualPreference: encodeURIComponent("Modern"),
+      keyMessage: encodeURIComponent("Innovation"),
+      designElements: encodeURIComponent("Minimalistic"),
       firstUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5DAD4",
       secondUrl: "https://www.thecolorapi.com/id?format=svg&hex=E5CBD4",
       thirdUrl: "https://www.thecolorapi.com/id?format=svg&hex=F4DAC3",

@@ -12,7 +12,7 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 // New route handler for PDF generation
 app.get("/generate-pdf", async (req, res) => {
     try {
-        let { userName, 
+        let { userName, businessName, industry, targetAudience, visualPreference, keyMessage, designElements,
             firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, 
             firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB,
             firstHex, secondHex, thirdHex, fourthHex, fifthHex,
@@ -58,6 +58,16 @@ app.get("/generate-pdf", async (req, res) => {
 
         // Draw the screenshot image on the page
         doc.image(screenshotImage, 50, 120, { width: 300 });
+        
+        // Add business details
+        doc.font('Helvetica').fontSize(10)
+        .text('')
+        .text(`Business Name: ${businessName}`, 50, 430)
+        .text(`Industry: ${industry}`, 50, 445)
+        .text(`Target Audience: ${targetAudience}`, 50, 460)
+        .text(`Visual Preference: ${visualPreference}`, 50, 475)
+        .text(`Key Message: ${keyMessage}`, 50, 490)
+        .text(`Design Elements: ${designElements}`, 50, 505);
 
         // Add "Color Palette" header
         doc.font('Helvetica-Bold').text('COLOR PALETTE', 350, 90, { continued: true, width: 200, align: 'right' });
