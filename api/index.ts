@@ -1,15 +1,11 @@
 const express = require('express');
-const { createWriteStream } = require('fs');
 const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const svgToImg = require('svg-to-img');
 const nodemailer = require('nodemailer');
-const { join } = require('path');
 const { tmpdir } = require('os');
 
 const app = express();
-
-
 
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
@@ -50,12 +46,35 @@ app.get("/generate-pdf", async (req, res) => {
         const hexSet = [firstHex, secondHex, thirdHex, fourthHex, fifthHex];
         const cmykSet = [firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK];
 
-        // Create a new PDF document in landscape orientation
+        // Create a new PDF document in memory
         const doc = new PDFDocument({ layout: 'landscape' });
-        
-        // Pipe the PDF to a writable stream in /tmp directory
-        const pdfPath = join(tmpdir(), 'landscape.pdf');
-        const stream = doc.pipe(createWriteStream(pdfPath));
+        const buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', async () => {
+            const pdfBuffer = Buffer.concat(buffers);
+
+            try {
+                // Send the PDF as attachment via email
+                const info = await transporter.sendMail({
+                    from: 'sheane39@gmail.com',
+                    to: 'sheanemtolentino@gmail.com',
+                    subject: 'Your PDF Report',
+                    text: 'Please find the PDF attached.',
+                    attachments: [
+                        {
+                            filename: 'landscape.pdf',
+                            content: pdfBuffer
+                        }
+                    ]
+                });
+
+                console.log('Email sent:', info.response);
+                res.status(200).send('PDF emailed successfully');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                res.status(500).send('Error sending email');
+            }
+        });
 
         // Add User Name
         doc.fontSize(12).text(`User Name: ${userName}`, 50, 50);
@@ -118,31 +137,6 @@ app.get("/generate-pdf", async (req, res) => {
         
         // Finalize the document
         doc.end();
-
-        /// Wait for the PDF to be finished writing
-        stream.on('finish', async () => {
-            try {
-                // Send the PDF as attachment via email
-                const info = await transporter.sendMail({
-                    from: 'sheane39@gmail.com',
-                    to: 'sheanemtolentino@gmail.com',
-                    subject: 'Your PDF Report',
-                    text: 'Please find the PDF attached.',
-                    attachments: [
-                        {
-                            filename: 'landscape.pdf',
-                            path: pdfPath
-                        }
-                    ]
-                });
-                
-                console.log('Email sent:', info.response);
-                res.status(200).send('PDF emailed successfully');
-            } catch (error) {
-                console.error('Error sending email:', error);
-                res.status(500).send('Error sending email');
-            }
-        });
     } catch (error) {
         console.error('Error generating PDF:', error);
         res.status(500).send('Error generating PDF');
