@@ -4,8 +4,12 @@ const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const svgToImg = require('svg-to-img');
 const nodemailer = require('nodemailer');
+const { join } = require('path');
+const { tmpdir } = require('os');
 
 const app = express();
+
+
 
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
@@ -48,9 +52,10 @@ app.get("/generate-pdf", async (req, res) => {
 
         // Create a new PDF document in landscape orientation
         const doc = new PDFDocument({ layout: 'landscape' });
-
-        // Pipe the PDF to a writable stream
-        const stream = doc.pipe(createWriteStream('landscape.pdf'));
+        
+        // Pipe the PDF to a writable stream in /tmp directory
+        const pdfPath = join(tmpdir(), 'landscape.pdf');
+        const stream = doc.pipe(createWriteStream(pdfPath));
 
         // Add User Name
         doc.fontSize(12).text(`User Name: ${userName}`, 50, 50);
@@ -126,11 +131,11 @@ app.get("/generate-pdf", async (req, res) => {
                     attachments: [
                         {
                             filename: 'landscape.pdf',
-                            path: 'landscape.pdf'
+                            path: pdfPath
                         }
                     ]
                 });
-
+                
                 console.log('Email sent:', info.response);
                 res.status(200).send('PDF emailed successfully');
             } catch (error) {
