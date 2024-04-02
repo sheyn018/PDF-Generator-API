@@ -1,8 +1,8 @@
 const express = require('express');
 const PDFDocument = require('pdfkit');
 const axios = require('axios');
-const svgToImg = require('svg-to-img');
 const nodemailer = require('nodemailer');
+const svg2png = require('svg2png');
 
 const app = express();
 
@@ -44,8 +44,8 @@ app.get("/generate-pdf", async (req, res) => {
         const rgbSet = [firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB];
         const hexSet = [firstHex, secondHex, thirdHex, fourthHex, fifthHex];
         const cmykSet = [firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK];
-
-        // Create a new PDF document in memory
+        
+            // Create a new PDF document in memory
         const doc = new PDFDocument({ layout: 'landscape' });
         const buffers = [];
         doc.on('data', buffers.push.bind(buffers));
@@ -75,6 +75,8 @@ app.get("/generate-pdf", async (req, res) => {
             }
         });
 
+        userName = decodeURIComponent(userName);
+
         // Add User Name
         doc.fontSize(12).text(`User Name: ${userName}`, 50, 50);
 
@@ -102,33 +104,30 @@ app.get("/generate-pdf", async (req, res) => {
         .text(`Key Message: ${keyMessage}`, 50, 490)
         .text(`Design Elements: ${designElements}`, 50, 505);
 
+        // Pipe the PDF document to the response
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="landscape.pdf"`);
+
         // Add "Color Palette" header
         doc.font('Helvetica-Bold').text('COLOR PALETTE', 350, 90, { continued: true, width: 200, align: 'right' });
-
-        // Add images from URLs on the right side
+        
         let currentPosition = 120; // Start position vertically
-        const textXCoordinate = 530; // X-coordinate for text
         let index = 0;
-        for (const url of urlSet) {
+        for (const url of [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl]) {
             const response = await axios.get(url, { responseType: 'text' });
             const svgString = response.data;
 
             // Convert SVG to PNG
-            const pngBuffer = await svgToImg.from(svgString).toPng();
+            const pngBuffer = await svg2png(Buffer.from(svgString, 'utf-8'));
 
-            // Draw the image on the right side
-            doc.image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
-
-            // Add text next to the image
-            const hexValue = hexSet[index];
-            const rgbValue = rgbSet[index];
-            const cmykValue = cmykSet[index];
-
-            doc.fontSize(10)
-            .text('')
-            .text(`HEX: ${hexValue}`, textXCoordinate, currentPosition + 7)
-            .text(`RGB: ${rgbValue}`, textXCoordinate, currentPosition + 17)
-            .text(`CMYK: ${cmykValue}`, textXCoordinate, currentPosition + 27);
+            // Embed the converted PNG onto the PDF
+            doc
+                .fontSize(10)
+                .text('')
+                .text(`HEX: ${firstHex}`, 530, currentPosition + 7)
+                .text(`RGB: ${firstRGB}`, 530, currentPosition + 17)
+                .text(`CMYK: ${firstCMYK}`, 530, currentPosition + 27)
+                .image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
 
             currentPosition += 95; // Increment vertical position
             index++;

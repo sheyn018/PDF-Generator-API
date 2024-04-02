@@ -5,7 +5,7 @@
     "fs": "^0.0.1-security",
     "nodemailer": "^6.9.13",
     "pdfkit": "^0.15.0",
-    "svg-to-img": "^2.0.9"
+    "svg2png": "^4.1.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.30"
