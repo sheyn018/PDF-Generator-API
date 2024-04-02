@@ -3,7 +3,6 @@ const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const svgToImg = require('svg-to-img');
 const nodemailer = require('nodemailer');
-const { tmpdir } = require('os');
 
 const app = express();
 
