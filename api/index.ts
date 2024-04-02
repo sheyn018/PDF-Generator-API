@@ -142,6 +142,9 @@ app.get("/generate-pdf", async (req, res) => {
     }
 });
 
-app.listen(3001, () => console.log("Server ready on port 3001."));
+const port = 3800;
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});
 
 module.exports = app;
