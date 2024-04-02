@@ -2,7 +2,8 @@ const express = require('express');
 const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
-const svg2png = require('svg2png');
+const sharp = require('sharp'); // Import Sharp
+const stream = require('stream');
 
 const app = express();
 
@@ -45,7 +46,7 @@ app.get("/generate-pdf", async (req, res) => {
         const hexSet = [firstHex, secondHex, thirdHex, fourthHex, fifthHex];
         const cmykSet = [firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK];
         
-            // Create a new PDF document in memory
+        // Create a new PDF document in memory
         const doc = new PDFDocument({ layout: 'landscape' });
         const buffers = [];
         doc.on('data', buffers.push.bind(buffers));
@@ -113,20 +114,20 @@ app.get("/generate-pdf", async (req, res) => {
         
         let currentPosition = 120; // Start position vertically
         let index = 0;
-        for (const url of [firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl]) {
+        for (const url of urlSet) {
             const response = await axios.get(url, { responseType: 'text' });
             const svgString = response.data;
 
-            // Convert SVG to PNG
-            const pngBuffer = await svg2png(Buffer.from(svgString, 'utf-8'));
+            // Convert SVG to PNG using Sharp
+            const pngBuffer = await sharp(Buffer.from(svgString)).png().toBuffer();
 
             // Embed the converted PNG onto the PDF
             doc
                 .fontSize(10)
                 .text('')
-                .text(`HEX: ${firstHex}`, 530, currentPosition + 7)
-                .text(`RGB: ${firstRGB}`, 530, currentPosition + 17)
-                .text(`CMYK: ${firstCMYK}`, 530, currentPosition + 27)
+                .text(`HEX: ${hexSet[index]}`, 530, currentPosition + 7)
+                .text(`RGB: ${rgbSet[index]}`, 530, currentPosition + 17)
+                .text(`CMYK: ${cmykSet[index]}`, 530, currentPosition + 27)
                 .image(pngBuffer, 450, currentPosition, { width: 70, height: 70 });
 
             currentPosition += 95; // Increment vertical position
