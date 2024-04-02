@@ -21,12 +21,12 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 // New route handler for PDF generation
 app.get("/generate-pdf", async (req, res) => {
     try {
-        let { userName, businessName, industry, targetAudience, visualPreference, keyMessage, designElements,
-            firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, 
-            firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB,
-            firstHex, secondHex, thirdHex, fourthHex, fifthHex,
-            firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK,
-            screenshotUrl } = req.query;
+        let {   userName, businessName, industry, targetAudience, visualPreference, keyMessage, designElements,
+                firstUrl, secondUrl, thirdUrl, fourthUrl, fifthUrl, 
+                firstRGB, secondRGB, thirdRGB, fourthRGB, fifthRGB,
+                firstHex, secondHex, thirdHex, fourthHex, fifthHex,
+                firstCMYK, secondCMYK, thirdCMYK, fourthCMYK, fifthCMYK,
+                screenshotUrl } = req.query;
         
         userName = decodeURIComponent(userName);
         firstRGB = decodeURIComponent(firstRGB);
